@@ -1,8 +1,10 @@
 const express = require("express");
 const next = require("next");
-
-const port = parseInt(process.env.PORT, 10) || 3000;
-const dev = process.env.NODE_ENV !== "production";
+const { publicRuntimeConfig, serverRuntimeConfig } = require("./next.config");
+const { isDev } = publicRuntimeConfig;
+const { PORT } = serverRuntimeConfig;
+// 判断开发环境和生产环境
+const dev = isDev;
 const app = next({ dev });
 const handle = app.getRequestHandler();
 
@@ -12,38 +14,38 @@ app.prepare().then(() => {
   server.all("*", (req, res) => {
     return handle(req, res);
   });
-  server.get('/', (req, res) => {
-    return app.render(req, res, '/index')
+  server.get("/", (req, res) => {
+    return app.render(req, res, "/index");
   });
   const robotsOptions = {
-    root: __dirname + '/static/',
+    root: __dirname + "/public/",
     headers: {
-      'Content-Type': 'text/plain;charset=UTF-8',
-    }
+      "Content-Type": "text/plain;charset=UTF-8",
+    },
   };
-  server.get('/robots.txt', (req, res) => (
-    res.status(200).sendFile('robots.txt', robotsOptions)
-  ));
-  
-  const sitemapOptions = {
-    root: __dirname + '/static/',
-    headers: {
-      'Content-Type': 'text/xml;charset=UTF-8',
-    }
-  };
-  server.get('/sitemap.xml', (req, res) => (
-    res.status(200).sendFile('sitemap.xml', sitemapOptions)
-  ));
-  
-  const faviconOptions = {
-    root: __dirname + '/static/'
-  };
-  server.get('/favicon.ico', (req, res) => (
-    res.status(200).sendFile('favicon.ico', faviconOptions)
-  ));
+  server.get("/robots.txt", (req, res) =>
+    res.status(200).sendFile("robots.txt", robotsOptions)
+  );
 
-  server.listen(port, (err) => {
+  const sitemapOptions = {
+    root: __dirname + "/public/",
+    headers: {
+      "Content-Type": "text/xml;charset=UTF-8",
+    },
+  };
+  server.get("/sitemap.xml", (req, res) =>
+    res.status(200).sendFile("sitemap.xml", sitemapOptions)
+  );
+
+  const faviconOptions = {
+    root: __dirname + "/public/",
+  };
+  server.get("/favicon.ico", (req, res) =>
+    res.status(200).sendFile("favicon.ico", faviconOptions)
+  );
+
+  server.listen(PORT, (err) => {
     if (err) throw err;
-    console.log(`> Ready on http://localhost:${port}`);
+    console.log(`> Ready on http://localhost:${PORT}`);
   });
 });
